@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .container { display: flex; height: 100vh; }
+        .inbox { width: 250px; background-color: #f7f7f7; padding: 10px; border-right: 1px solid #ccc; }
+        .inbox h2 { text-align: center; }
+        .inbox ul { list-style: none; padding: 0; }
+        .inbox ul li { padding: 10px; cursor: pointer; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; }
+        .inbox ul li:hover { background-color: #e9e9e9; }
+        .inbox ul li .unread { background-color: #007BFF; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
+
+        .chat { flex-grow: 1; display: flex; flex-direction: column; }
+        .chat-header { padding: 20px; border-bottom: 1px solid #ccc; }
+        .chat-messages { flex-grow: 1; padding: 20px; overflow-y: scroll; }
+        .chat-messages p { margin: 5px 0; }
+        .chat-input { padding: 10px; border-top: 1px solid #ccc; display: flex; }
+        .chat-input input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .chat-input button { padding: 10px; background-color: #007BFF; color: white; border: none; border-radius: 5px; margin-left: 10px; cursor: pointer; }
+        .chat-input button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="inbox">
+            <h2>Inbox</h2>
+            <ul id="userList">
+                <!-- Users will be dynamically added here -->
+            </ul>
+        </div>
+        <div class="chat">
+            <div class="chat-header">
+                <h2 id="chatWith">Conversation</h2>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be dynamically added here -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type a message..." disabled>
+                <button onclick="sendMessage()" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const users = [
+            { name: 'Alice', unread: 2, messages: ["Hi, how are you?", "I'm good, thanks! How about you?"] },
+            { name: 'Bob', unread: 5, messages: ["Hello!", "Are you there?"] },
+            { name: 'Charlie', unread: 1, messages: ["Good morning!"] },
+            { name: 'David', unread: 0, messages: ["Hey!","Good morning!"] }
+        ];
+        
+        users.forEach(user => {
+            user.unread = user.messages.length;
+        });
+
+        function loadUsers() {
+            const userList = document.getElementById('userList');
+            users.forEach((user, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${user.name} ${user.unread > 0 ? '<span class="unread">' + user.unread + ' unread</span>' : ''}`;
+                li.onclick = () => openChat(index);
+                userList.appendChild(li);
+            });
+        }
+
+        function openChat(index) {
+            const chatWith = document.getElementById('chatWith');
+            const chatMessages = document.getElementById('chatMessages');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.querySelector('.chat-input button');
+
+            chatWith.innerText = `Conversation with ${users[index].name}`;
+            chatMessages.innerHTML = '';
+            users[index].messages.forEach(message => {
+                const p = document.createElement('p');
+                p.innerText = message;
+                chatMessages.appendChild(p);
+            });
+
+            // Enable input fields when a chat is open
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+
+            // Reset unread count for the selected user
+            users[index].unread = 0;
+            document.querySelectorAll('.inbox ul li')[index].innerHTML = `${users[index].name}`;
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message === '') return;
+
+            const chatMessages = document.getElementById('chatMessages');
+            const p = document.createElement('p');
+            p.innerText = message;
+            chatMessages.appendChild(p);
+
+            // Clear the input field
+            messageInput.value = '';
+        }
+
+        // Check if user is logged in
+        if (!localStorage.getItem('loggedIn')) {
+            window.location.href = 'index.html';
+        } else {
+            loadUsers();
+        }
+    </script>
+</body>
+</html>
